@@ -77,6 +77,16 @@ variable of NAME and return this output as string."
     (when (re-search-backward "__RESULT=\\(.*\\)" nil t)
       (match-string 1))))
 
+(defun exec-path-from-shell-getenvs (names)
+  "Get a list of variables from the shell in a single hit"
+  (with-temp-buffer
+    (call-process (getenv "SHELL") nil (current-buffer) nil
+                  "--login" "-i" "-c"
+                  (mapconcat (lambda (name) (concat "echo __RESULT=$" name)) names ";"))
+    (beginning-of-buffer)
+    (while (re-search-forward "__RESULT=\\(.*\\)" nil t)
+      (message (match-string 1)))))
+
 ;;;###autoload
 (defun exec-path-from-shell-copy-env (name)
   "Set the environment variable $NAME from the user's shell.
