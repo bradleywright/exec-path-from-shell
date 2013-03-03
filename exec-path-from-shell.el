@@ -101,13 +101,12 @@ of the environment variable."
 
 ;;;###autoload
 (defun exec-path-from-shell-copy-env (name)
-  "Set the environment variable $NAME from the user's shell.
-
-As a special case, if the variable is $PATH, then `exec-path' and
-`eshell-path-env' are also set appropriately.  Return the value
-of the environment variable."
+  "Set the environment variable $NAME from the user's shell."
   (interactive "sCopy value of which environment variable from shell? ")
   (exec-path-from-shell-setenv name (exec-path-from-shell-getenv name)))
+
+(defun exec-path-from-shell-copy-envs (names)
+  (ex))
 
 ;;;###autoload
 (defun exec-path-from-shell-initialize ()
@@ -117,7 +116,7 @@ The values of all the environment variables named in
 `exec-path-from-shell-variables' are set from the corresponding
 values used in the user's shell."
   (interactive)
-  (mapc 'exec-path-from-shell-copy-env exec-path-from-shell-variables))
+  (exec-path-from-shell-copy-envs exec-path-from-shell-variables))
 
 
 (provide 'exec-path-from-shell)
