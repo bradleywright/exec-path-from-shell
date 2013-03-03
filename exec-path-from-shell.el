@@ -84,11 +84,8 @@ variable of NAME and return this output as string."
                                        "--login" "-i" "-c"
                                        (mapconcat (lambda (name) (concat "echo -n __RESULT=$" name)) names "; echo -n '----exec-path-from-shell-getenvs-----';"))
                          (buffer-string)) "----exec-path-from-shell-getenvs-----")))
-    (message (mapconcat 'identity results ";"))))
-
-     ;; (beginning-of-buffer)
-     ;; (while (re-search-forward "__RESULT=\\(.*\\)" nil t)
-     ;;   (message (match-string 1))))))
+    (mapcar (lambda (result)
+              (replace-regexp-in-string "__RESULT=\\(.*\\)" "\\1" result)) results)))
 
 (defun exec-path-from-shell-setenv (name value)
   "Sets the environment variable $NAME to $VALUE.
