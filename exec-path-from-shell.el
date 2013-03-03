@@ -79,13 +79,28 @@ variable of NAME and return this output as string."
 
 (defun exec-path-from-shell-getenvs (names)
   "Get a list of variables from the shell in a single hit"
-  (with-temp-buffer
-    (call-process (getenv "SHELL") nil (current-buffer) nil
-                  "--login" "-i" "-c"
-                  (mapconcat (lambda (name) (concat "echo __RESULT=$" name)) names ";"))
-    (beginning-of-buffer)
-    (while (re-search-forward "__RESULT=\\(.*\\)" nil t)
-      (message (match-string 1)))))
+  (let ((results (split-string (with-temp-buffer
+                         (call-process (getenv "SHELL") nil (current-buffer) nil
+                                       "--login" "-i" "-c"
+                                       (mapconcat (lambda (name) (concat "echo -n __RESULT=$" name)) names "; echo -n '----exec-path-from-shell-getenvs-----';"))
+                         (buffer-string)) "----exec-path-from-shell-getenvs-----")))
+    (message (mapconcat 'identity results ";"))))
+
+     ;; (beginning-of-buffer)
+     ;; (while (re-search-forward "__RESULT=\\(.*\\)" nil t)
+     ;;   (message (match-string 1))))))
+
+(defun exec-path-from-shell-setenv (name value)
+  "Sets the environment variable $NAME to $VALUE.
+
+As a special case, if the variable is $PATH, then `exec-path' and
+`eshell-path-env' are also set appropriately.  Return the value
+of the environment variable."
+  (prog1
+      (setenv name value)
+    (when (string-equal "PATH" name)
+      (setq eshell-path-env value
+            exec-path (split-string value path-separator)))))
 
 ;;;###autoload
 (defun exec-path-from-shell-copy-env (name)
@@ -95,11 +110,7 @@ As a special case, if the variable is $PATH, then `exec-path' and
 `eshell-path-env' are also set appropriately.  Return the value
 of the environment variable."
   (interactive "sCopy value of which environment variable from shell? ")
-  (prog1
-      (setenv name (exec-path-from-shell-getenv name))
-    (when (string-equal "PATH" name)
-      (setq eshell-path-env (getenv "PATH")
-            exec-path (split-string (getenv "PATH") path-separator)))))
+  (exec-path-from-shell-setenv name (exec-path-from-shell-getenv name)))
 
 ;;;###autoload
 (defun exec-path-from-shell-initialize ()
