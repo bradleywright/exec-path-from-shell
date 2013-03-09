@@ -82,7 +82,7 @@ variable of NAME and return this output as string."
   (let ((results (split-string (with-temp-buffer
                          (call-process (getenv "SHELL") nil (current-buffer) nil
                                        "--login" "-i" "-c"
-                                       (mapconcat (lambda (name) (concat "echo -n __RESULT=$" name)) names "; echo -n '----exec-path-from-shell-getenvs-----';"))
+                                       (mapconcat (lambda (name) (concat "printf '%s' __RESULT=$" name)) names "; printf '%s' '----exec-path-from-shell-getenvs-----';"))
                          (buffer-string)) "----exec-path-from-shell-getenvs-----")))
     (mapcar (lambda (result)
               (replace-regexp-in-string "__RESULT=\\(.*\\)" "\\1" result)) results)))
